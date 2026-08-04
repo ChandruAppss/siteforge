@@ -84,7 +84,9 @@ window.SITEFORGE_CONTENT = {
   stats: {
     show: true,   // section stays — three of the four claims are true
     items: [
-      { value: '30s', label: 'Average time to your first live draft', real: true },
+      // Measured: one website takes ~97s, six run in parallel, so wall-clock is
+      // roughly two minutes. Re-measure if the prompt or MAX_TOKENS changes.
+      { value: '~2 min', label: 'From your description to six finished websites', real: true },
       { value: '6,500+', label: 'Businesses building on SiteForge', real: false },
       { value: '6', label: 'Free custom websites before you pay', real: true },
       { value: '100%', label: 'Refund guarantee, no questions asked', real: true },
