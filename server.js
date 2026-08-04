@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 import generateHandler from './api/generate.js';
 import stylesHandler from './api/styles.js';
-import { MODEL } from './lib/generate.js';
+import { providerStatus, PROVIDERS } from './lib/providers/index.js';
 import { VARIANT_COUNT } from './lib/styles.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,21 +28,28 @@ app.post('/api/generate', generateHandler);
 app.get('/api/styles', stylesHandler);
 
 app.get('/api/health', (req, res) => {
-  res.json({
-    ok: true,
-    model: MODEL,
-    variants: VARIANT_COUNT,
-    apiKeyConfigured: Boolean(process.env.ANTHROPIC_API_KEY),
-  });
+  res.json({ ok: true, variants: VARIANT_COUNT, ...providerStatus() });
 });
 
 app.listen(PORT, () => {
+  const status = providerStatus();
   console.log(`\n  SiteForge running → http://localhost:${PORT}`);
-  console.log(`  Model: ${MODEL}   Variants per request: ${VARIANT_COUNT}`);
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.log('\n  ⚠  ANTHROPIC_API_KEY is not set — the page loads but generation will fail.');
-    console.log('     Copy .env.example to .env, add your key, then restart.\n');
-  } else {
-    console.log('  API key: configured ✓\n');
+
+  if (process.env.MOCK_GENERATION === '1') {
+    console.log('  Provider: MOCK (no API calls, no cost)\n');
+    return;
   }
+
+  if (status.error) {
+    console.log(`\n  ⚠  ${status.error}`);
+    console.log('     The page loads, but generation will fail. Options:\n');
+    for (const p of PROVIDERS) {
+      console.log(`       ${p.freeTier ? '[free tier]' : '[paid]    '} ${p.keyEnv.padEnd(20)} ${p.keyUrl}`);
+    }
+    console.log('\n     Set one in .env, then restart.\n');
+    return;
+  }
+
+  console.log(`  Provider: ${status.providerLabel}${status.freeTier ? ' (free tier)' : ''}`);
+  console.log(`  Model: ${status.model}   Variants per request: ${VARIANT_COUNT}\n`);
 });

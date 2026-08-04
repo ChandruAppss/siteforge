@@ -6,7 +6,8 @@
    and because the response streams, a partial page can be painted within a
    couple of seconds instead of after a minute and a half of blank spinner. */
 
-import { streamWebsite, validateInput, MODEL } from '../lib/generate.js';
+import { streamWebsite, validateInput } from '../lib/generate.js';
+import { resolveProvider } from '../lib/providers/index.js';
 import { rateLimit, codeMatches, accessCodeRequired } from '../lib/ratelimit.js';
 
 export const config = {
@@ -40,11 +41,10 @@ export default async function handler(req, res) {
   const parsed = validateInput(req.body);
   if (parsed.error) return res.status(400).json({ error: parsed.error });
 
-  // Mock mode needs no key — checking first would make it unreachable.
-  if (!process.env.ANTHROPIC_API_KEY && process.env.MOCK_GENERATION !== '1') {
-    return res.status(500).json({
-      error: 'ANTHROPIC_API_KEY is not set. Add it in Vercel → Settings → Environment Variables, then redeploy.',
-    });
+  // Mock mode needs no provider — checking first would make it unreachable.
+  if (process.env.MOCK_GENERATION !== '1') {
+    const { error } = resolveProvider();
+    if (error) return res.status(500).json({ error });
   }
 
   const started = Date.now();
@@ -72,7 +72,8 @@ export default async function handler(req, res) {
     });
 
     res.end();
-    console.log(`✓ ${result.style} — ${(result.html.length / 1024).toFixed(1)}KB in ${((Date.now() - started) / 1000).toFixed(1)}s (${MODEL})`);
+    const { provider, model } = resolveProvider();
+    console.log(`✓ ${result.style} — ${(result.html.length / 1024).toFixed(1)}KB in ${((Date.now() - started) / 1000).toFixed(1)}s (${provider?.id}/${model})`);
   } catch (err) {
     const message = (err?.message || 'Generation failed').replace(/-->/g, '--');
     console.error(`✗ style ${parsed.styleIndex} — ${message}`);

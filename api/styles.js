@@ -3,7 +3,7 @@
    is needed before it will. */
 
 import { STYLES, VARIANT_COUNT } from '../lib/styles.js';
-import { MODEL } from '../lib/generate.js';
+import { providerStatus } from '../lib/providers/index.js';
 import { accessCodeRequired } from '../lib/ratelimit.js';
 
 export default function handler(req, res) {
@@ -11,14 +11,21 @@ export default function handler(req, res) {
   // that can change with a redeploy.
   res.setHeader('Cache-Control', 'no-store');
 
-  // In mock mode there is no key and none is needed — report that the server
-  // can generate, or the client refuses to start and the mock is untestable.
+  // In mock mode there is no provider and none is needed — report that the
+  // server can generate, or the client refuses to start and mock is untestable.
   const mock = process.env.MOCK_GENERATION === '1';
+  const status = providerStatus();
 
   res.status(200).json({
-    model: mock ? 'mock' : MODEL,
     mock,
-    apiKeyConfigured: Boolean(process.env.ANTHROPIC_API_KEY) || mock,
+    provider: mock ? 'mock' : status.provider,
+    providerLabel: mock ? 'Mock' : status.providerLabel,
+    model: mock ? 'mock' : status.model,
+    freeTier: mock ? true : status.freeTier,
+    configuredProviders: status.configured,
+    // Kept under the old name so existing clients keep working.
+    apiKeyConfigured: mock || Boolean(status.provider && !status.error),
+    providerError: mock ? null : status.error,
     accessCodeRequired: accessCodeRequired(),
     styles: STYLES.slice(0, VARIANT_COUNT).map((s, i) => ({
       index: i,

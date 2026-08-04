@@ -65,14 +65,43 @@ Set the key in **Vercel → Project → Settings → Environment Variables**, th
 
 | Variable | Default | What it does |
 | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | — | **Required** for generation. |
+| *one provider key* | — | **Required.** See [Providers](#providers) below. |
+| `AI_PROVIDER` | auto | Pin a provider instead of auto-detecting. |
+| `AI_MODEL` | provider default | Override the model. |
 | `PORT` | `3000` | Local server port (ignored on Vercel). |
-| `ANTHROPIC_MODEL` | `claude-sonnet-5` | `claude-opus-5` gives better sites, slower and pricier. |
-| `MAX_TOKENS` | `12000` | Output ceiling per website. |
+| `MAX_TOKENS` | `8000` | Output ceiling per website. The main lever on speed *and* cost. |
 | `VARIANT_COUNT` | `6` | Websites per submission (1–6). Lower it to cut cost. |
 | `ACCESS_CODE` | unset | If set, the generator refuses to run without it. |
 | `RATE_MAX` | `12` | Generations allowed per IP per window. |
 | `RATE_WINDOW_MS` | `3600000` | The window, in ms (1 hour). |
+
+## Providers
+
+Set **one** API key. Adapters live in `lib/providers/`; nothing else in the codebase knows which
+provider is running.
+
+| Provider | Key | Cost | Get a key |
+| --- | --- | --- | --- |
+| Google Gemini | `GEMINI_API_KEY` | free tier | <https://aistudio.google.com/apikey> |
+| Groq | `GROQ_API_KEY` | free tier | <https://console.groq.com/keys> |
+| OpenRouter | `OPENROUTER_API_KEY` | free models | <https://openrouter.ai/keys> |
+| Anthropic | `ANTHROPIC_API_KEY` | paid | <https://console.anthropic.com/settings/keys> |
+| OpenAI | `OPENAI_API_KEY` | paid | <https://platform.openai.com/api-keys> |
+
+**Selection.** `AI_PROVIDER` wins if set. Otherwise the first provider with a key present is used,
+and free tiers are checked first — so dropping a `GEMINI_API_KEY` into an Anthropic deployment
+switches it over without touching anything else. `/api/health` reports what actually resolved.
+
+Groq, OpenRouter and OpenAI all speak the OpenAI chat-completions protocol, so one adapter
+(`openai-compatible.js`) serves all three; Gemini and Anthropic have their own.
+
+**Model ids move.** Each provider has a sane default, but they get renamed and retired regularly. If
+you see "model not found", set `AI_MODEL` to something current rather than assuming the integration
+is broken.
+
+**Free tiers are not free capacity.** They carry rate limits, can change terms without notice, and
+several train on your inputs by default. Read the provider's terms before putting customer business
+descriptions through one.
 
 ## Abuse protection
 
