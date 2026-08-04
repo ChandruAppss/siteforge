@@ -29,7 +29,16 @@ window.SITEFORGE_CONTENT = {
      `showComparison: false` below to drop the "bought separately" column and
      sell on your own price alone. */
   pricing: {
-    showComparison: true,
+    // OFF until the "bought separately" figures are ones you can evidence.
+    // Turning this on also brings back the "Save ₹X" claims below, which are
+    // derived from it — the saving is only true if the comparison is true.
+    showComparison: false,
+
+    // The headline saving shown in the navbar, hero and above the price table.
+    // null hides all three. Set it to a string (e.g. '₹20,000') only when
+    // showComparison is true and the arithmetic actually holds.
+    savingsClaim: null,
+
     monthly: '₹299',
     annual: '₹3,999',
     storeAddon: '₹250',
@@ -73,7 +82,7 @@ window.SITEFORGE_CONTENT = {
      no customer count. Put in your real numbers, or set `show: false` and the
      band renders with the honest ones only. */
   stats: {
-    show: true,
+    show: true,   // section stays — three of the four claims are true
     items: [
       { value: '30s', label: 'Average time to your first live draft', real: true },
       { value: '6,500+', label: 'Businesses building on SiteForge', real: false },
@@ -83,8 +92,8 @@ window.SITEFORGE_CONTENT = {
   },
 
   /* Shown next to the hero and above the testimonials.
-     ⚠ PLACEHOLDER — set to null to hide both until it is true. */
-  customerCount: '6,500+',
+     null until there is a real number to put here. */
+  customerCount: null,
 
   /* ── Testimonials ───────────────────────────────────────────────────────
      ⚠ PLACEHOLDER — these are written examples, not real customers. Publishing
@@ -92,7 +101,7 @@ window.SITEFORGE_CONTENT = {
      deceptive, so they are deliberately labelled "Sample Customer". Replace
      them with quotes you have permission to use, or set `show: false`. */
   testimonials: {
-    show: true,
+    show: false,   // hidden until there are real quotes to publish
     items: [
       { q: 'Clinic online instantly. Patients find us on search now.', n: 'Sample Customer', b: 'Dental clinic, Pune' },
       { q: 'Easy website, and it actually brings in enquiries.', n: 'Sample Customer', b: 'Staffing firm, Chennai' },
@@ -113,7 +122,7 @@ window.SITEFORGE_CONTENT = {
      ⚠ PLACEHOLDER — invented business names. Do NOT put real companies here
      unless they are actually customers and have agreed to be named. */
   marquee: {
-    show: true,
+    show: false,   // hidden until these are real, consenting customers
     items: [
       ['Bliss Studio', 'Salon', '#6a2bf3'], ['NorthCraft', 'Furniture', '#0ea5e9'],
       ['GreenLeaf', 'Organic', '#12a150'], ['UrbanBite', 'Cafe', '#f59e0b'],

@@ -1045,7 +1045,9 @@ s {
 
 .cred-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* auto-fit, not a fixed 4, because stats flagged as not-real are filtered
+     out — the band has to look right with 2, 3 or 4 cards. */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 18px;
   margin-top: 38px;
 }
@@ -2172,8 +2174,7 @@ s {
 @media (max-width: 1100px) {
 
   .hiw-grid,
-  .risk-grid,
-  .cred-grid {
+  .risk-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -2263,7 +2264,6 @@ s {
 
   .hiw-grid,
   .risk-grid,
-  .cred-grid,
   .gen-grid,
   .footer-inner {
     grid-template-columns: 1fr;

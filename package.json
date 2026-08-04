@@ -4,7 +4,6 @@
   "private": true,
   "description": "SiteForge — AI website builder landing page with a working Claude-powered generator",
   "type": "module",
-  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js"
@@ -13,7 +12,10 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.68.0",
+    "@anthropic-ai/sdk": "^0.68.0"
+  },
+  "//": "express + dotenv drive the LOCAL dev server only. The deployed serverless functions in api/ need neither, so they stay out of the production bundle.",
+  "devDependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.21.2"
   }

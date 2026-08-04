@@ -158,27 +158,44 @@
     const s = C.stats;
     if (!grid || !s) return;
 
-    if (s.show === false || !s.items?.length) {
+    // Drop any stat explicitly flagged as not real, then hide the whole band
+    // if nothing truthful is left.
+    const items = (s.items || []).filter(i => i.real !== false);
+
+    if (s.show === false || !items.length) {
       const section = $('#awards');
       if (section) section.hidden = true;
       return;
     }
 
-    grid.innerHTML = s.items.map(i => `
+    grid.innerHTML = items.map(i => `
       <div class="cred-card">
         <div class="cred-stat">${escapeHtml(i.value)}</div>
         <div class="cred-label">${escapeHtml(i.label)}</div>
       </div>`).join('');
   }
 
+  /* The "Save ₹X" lines in the navbar, hero and above the price table are all
+     derived from the comparison column. If that claim is switched off, these
+     have nothing behind them, so they come off with it. */
+  function renderSavingsClaim() {
+    const amount = C.pricing?.savingsClaim;
+    if (!amount) {
+      $$('[data-savings-claim]').forEach(el => { el.hidden = true; });
+      return;
+    }
+    $$('[data-savings-amount]').forEach(el => { el.textContent = amount; });
+  }
+
   function renderCustomerCount() {
     const count = C.customerCount;
     $$('[data-customer-count]').forEach(el => {
-      // Hide the whole line when there is no number worth claiming.
-      if (!count) { el.hidden = true; return; }
+      // Remove rather than hide, so headings that wrap the number don't keep a
+      // stray gap where it used to be.
+      if (!count) { el.remove(); return; }
       el.textContent = count;
     });
-    if (!count) $$('[data-customer-count-wrap]').forEach(el => el.hidden = true);
+    if (!count) $$('[data-customer-count-wrap]').forEach(el => { el.hidden = true; });
   }
 
   function renderContact() {
@@ -589,6 +606,7 @@
 
   /* ── Go ─────────────────────────────────────────────────────────────── */
   renderPricing();
+  renderSavingsClaim();
   renderStats();
   renderCustomerCount();
   renderContact();

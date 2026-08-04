@@ -1,0 +1,9 @@
+# server.js is the LOCAL dev server only. If it ships, Vercel detects an Express
+# app and deploys the whole thing as one legacy server instead of turning api/*
+# into serverless functions — which silently discards the per-function
+# maxDuration in vercel.json and makes every generation time out.
+server.js
+
+node_modules
+.env
+*.log
