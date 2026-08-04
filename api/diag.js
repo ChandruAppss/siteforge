@@ -11,10 +11,10 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
-import { MODEL } from '../lib/generate.js';
+import { MODEL, generateWebsite } from '../lib/generate.js';
 import { rateLimit } from '../lib/ratelimit.js';
 
-export const config = { maxDuration: 60 };
+export const config = { maxDuration: 300 };
 
 export default async function handler(req, res) {
   const limit = rateLimit(req);
@@ -33,6 +33,40 @@ export default async function handler(req, res) {
 
   if (!key) {
     return res.status(500).json({ ...report, ok: false, error: 'ANTHROPIC_API_KEY is not set' });
+  }
+
+  // ?full=1 runs one REAL generation through the production code path. Costs
+  // real credit, so it is temporary — remove this endpoint once diagnosed.
+  if (req.query?.full === '1') {
+    const t0 = Date.now();
+    try {
+      const result = await generateWebsite({
+        businessName: 'Aroma Coffee House',
+        businessDescription:
+          'A speciality coffee shop in Pune serving pour-over, cold brew and fresh-baked croissants. Open 7am to 9pm.',
+        styleIndex: 0,
+      });
+      return res.status(200).json({
+        ...report,
+        ok: true,
+        mode: 'full',
+        elapsedMs: Date.now() - t0,
+        htmlBytes: result.html.length,
+        style: result.style,
+        htmlStartsWith: result.html.slice(0, 60),
+      });
+    } catch (err) {
+      return res.status(200).json({
+        ...report,
+        ok: false,
+        mode: 'full',
+        elapsedMs: Date.now() - t0,
+        errorName: err?.name,
+        errorStatus: err?.status,
+        errorType: err?.error?.type || err?.type,
+        errorMessage: err?.message,
+      });
+    }
   }
 
   const started = Date.now();
