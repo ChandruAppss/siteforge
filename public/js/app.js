@@ -448,32 +448,43 @@
     const doc = getCardDoc(i);
 
     let full = '';
-    let pending = '';
     let lastPaint = 0;
+    let written = 0;       // chars of `full` already written into the iframe
+    let docStart = -1;     // index of <!DOCTYPE — everything before it is padding
 
     if (doc) { doc.open(); }
+
+    // Writing the server's flush padding into the iframe ahead of the doctype
+    // would put the document into quirks mode, so hold until the real page
+    // starts, then write only from there.
+    const paint = (force) => {
+      if (!doc) return;
+      if (docStart === -1) {
+        docStart = full.search(/<!DOCTYPE html|<html[\s>]/i);
+        if (docStart === -1) return;
+        written = docStart;
+      }
+      const now = Date.now();
+      if (!force && now - lastPaint < 200) return;
+      if (full.length > written) {
+        doc.write(full.slice(written));
+        written = full.length;
+        lastPaint = now;
+        markStreaming(i, Math.max(0, written - docStart));
+      }
+    };
 
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
       if (token !== runToken) { reader.cancel().catch(() => { }); break; }
 
-      const text = decoder.decode(value, { stream: true });
-      full += text;
-      pending += text;
-
-      // Batch paints — writing on every chunk thrashes layout for no benefit.
-      const now = Date.now();
-      if (doc && now - lastPaint > 200) {
-        doc.write(pending);
-        pending = '';
-        lastPaint = now;
-        markStreaming(i, full.length);
-      }
+      full += decoder.decode(value, { stream: true });
+      paint(false);
     }
 
     if (doc) {
-      if (pending) doc.write(pending);
+      paint(true);
       try { doc.close(); } catch { /* already closed */ }
     }
 

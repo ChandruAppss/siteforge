@@ -57,6 +57,12 @@ export default async function handler(req, res) {
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders?.();
 
+    // Vercel buffers the head of a streamed response, so the first real bytes
+    // can sit unsent for many seconds — which defeats the point of streaming.
+    // An immediate padded comment pushes past that buffer so chunks flow from
+    // the start. The client strips anything before <!DOCTYPE.
+    res.write(`<!--${' '.repeat(2048)}-->\n`);
+
     const result = await streamWebsite({
       ...parsed,
       onChunk: (text) => {
