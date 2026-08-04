@@ -6,8 +6,10 @@
 import { generateWebsite, validateInput, MODEL } from '../lib/generate.js';
 import { rateLimit, codeMatches, accessCodeRequired } from '../lib/ratelimit.js';
 
+// Inline config wins over vercel.json, so this has to match it or it silently
+// caps the limit. A full page generation runs 40-90s; 300 leaves real headroom.
 export const config = {
-  maxDuration: 60,   // seconds; raise to 300 on a Vercel Pro plan
+  maxDuration: 300,
 };
 
 export default async function handler(req, res) {
