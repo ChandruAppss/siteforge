@@ -435,8 +435,33 @@
     if (token !== runToken) return;
 
     if (!variants.some(v => v.status === 'ready')) {
-      showError('Every design failed to generate. Check the server logs and your API key, then try again.');
+      // Surface what actually went wrong. A generic "check your API key" hides
+      // the real cause — the server already knows it, so say it.
+      const reasons = variants.map(v => v.error).filter(Boolean);
+      showError(explainFailure(reasons[0]));
     }
+  }
+
+  /* Turn a raw API error into something the reader can act on. */
+  function explainFailure(raw) {
+    const msg = String(raw || '');
+
+    if (/credit balance is too low/i.test(msg)) {
+      return 'The Anthropic account behind this site has run out of credit, so no websites can be generated right now. ' +
+        'Adding credit at console.anthropic.com fixes it immediately — no redeploy needed.';
+    }
+    if (/rate|429|too many/i.test(msg)) {
+      return 'Too many requests right now. Wait a minute and try again.';
+    }
+    if (/401|authentication|invalid x-api-key|api key/i.test(msg)) {
+      return 'The server\'s API key was rejected. Check ANTHROPIC_API_KEY in the hosting environment.';
+    }
+    if (/timeout|timed out/i.test(msg)) {
+      return 'The generation took too long and was cut off. Try again — if it keeps happening, the function time limit needs raising.';
+    }
+    return msg
+      ? `Every design failed to generate. The server said: ${msg}`
+      : 'Every design failed to generate. Please try again.';
   }
 
   /* Read the streamed HTML, writing it into the card's iframe as it arrives.
