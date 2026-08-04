@@ -450,8 +450,19 @@
       return 'The Anthropic account behind this site has run out of credit, so no websites can be generated right now. ' +
         'Adding credit at console.anthropic.com fixes it immediately — no redeploy needed.';
     }
-    if (/rate|429|too many/i.test(msg)) {
-      return 'Too many requests right now. Wait a minute and try again.';
+    // "limit: 0" means no allocation at all, not an allowance you have spent.
+    // Telling someone to wait would be useless advice — this never recovers.
+    if (/limit:\s*0\b/i.test(msg) || /quota/i.test(msg) && /plan and billing/i.test(msg)) {
+      return 'The AI provider reports zero quota for this API key, so nothing can be generated. ' +
+        'This will not fix itself by waiting — the key needs quota enabled, a different model, or a different provider.';
+    }
+    if (/quota exceeded/i.test(msg)) {
+      return 'The AI provider\'s quota for this key is used up. It resets on the provider\'s own schedule — ' +
+        'or switch provider to keep going now.';
+    }
+    if (/rate limit|too many requests|RESOURCE_EXHAUSTED|\b429\b/i.test(msg)) {
+      return 'The AI provider is rate limiting these requests. Wait a minute and try again, ' +
+        'or lower VARIANT_COUNT so fewer run at once.';
     }
     if (/401|authentication|invalid x-api-key|api key/i.test(msg)) {
       return 'The server\'s API key was rejected. Check ANTHROPIC_API_KEY in the hosting environment.';
