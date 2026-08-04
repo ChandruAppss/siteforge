@@ -286,6 +286,7 @@
   const elBar = $('#genBar');
   const elStatus = $('#genStatus');
   const elSteps = $('#genSteps');
+  const elResultsStatus = $('#genResultsStatus');
 
   const STEP_LABELS = [
     'Reading your business details',
@@ -367,19 +368,21 @@
       status: 'pending', html: null, error: null,
     }));
 
-    // Build the grid now, but stay on the progress view until the first design
-    // actually lands — there is nothing worth looking at before that.
-    renderVariants();
+    // Straight to the grid. Each card gets a live iframe that the stream writes
+    // into, so pages visibly build instead of appearing all at once at the end.
+    buildGrid();
+    openOverlay('results');
 
     const total = variants.length;
     let settled = 0;
 
     const updateProgress = () => {
       const ready = variants.filter(v => v.status === 'ready').length;
-      elBar.style.width = Math.min(100, 8 + Math.round((settled / total) * 92)) + '%';
-      renderSteps(Math.min(STEP_LABELS.length - 1, Math.floor((settled / total) * STEP_LABELS.length)));
-      elStatus.textContent = `${ready} of ${total} websites ready…`;
+      elResultsStatus.textContent = settled < total
+        ? `Writing your websites… ${ready} of ${total} finished`
+        : `${ready} of ${total} websites ready`;
     };
+    updateProgress();
 
     const accessCode = ($('#accessCode')?.value || '').trim();
 
@@ -390,11 +393,11 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ businessName, businessDescription, styleIndex: s.index, accessCode }),
         });
-        const data = await res.json().catch(() => ({}));
 
-        // A bad code or a rate limit applies to the whole run, not one design —
-        // stop everything and say so once instead of six identical card errors.
+        // Gate failures come back as JSON and apply to the whole run, not one
+        // design — stop everything and say so once, not six times.
         if (res.status === 401 || res.status === 429) {
+          const data = await res.json().catch(() => ({}));
           if (token === runToken) {
             revealAccessCode();
             showError(data.error || 'Access denied.');
@@ -402,79 +405,141 @@
           throw new Error(data.error || 'Access denied');
         }
 
-        if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `Request failed (${res.status})`);
+        }
 
+        const html = await consumeStream(res, i, token);
         if (token !== runToken) return;
+
+        if (!/<html[\s>]/i.test(html) || html.length < 800) {
+          throw new Error('The model did not return a complete page.');
+        }
+
         variants[i].status = 'ready';
-        variants[i].html = data.html;
+        variants[i].html = html;
+        markReady(i);
       } catch (err) {
         if (token !== runToken) return;
         variants[i].status = 'failed';
         variants[i].error = err.message === 'Failed to fetch'
           ? 'Lost connection to the server'
           : err.message;
+        markFailed(i);
       } finally {
-        if (token === runToken) {
-          settled++;
-          updateProgress();
-          // First design in: swap the progress view for the results grid so the
-          // user can start browsing while the rest are still being written.
-          if (elResults.hidden && variants.some(v => v.status === 'ready')) {
-            openOverlay('results');
-          }
-          renderVariants();
-        }
+        if (token === runToken) { settled++; updateProgress(); }
       }
     }));
 
     if (token !== runToken) return;
 
-    elBar.style.width = '100%';
     if (!variants.some(v => v.status === 'ready')) {
       showError('Every design failed to generate. Check the server logs and your API key, then try again.');
     }
   }
 
-  function renderVariants() {
-    elGrid.innerHTML = variants.map((v, i) => {
-      if (v.status === 'ready') {
-        return `
-          <div class="gen-card">
-            <div class="gen-card-thumb">
-              <iframe title="${escapeAttr(v.style)} preview" sandbox="allow-same-origin"
-                      srcdoc="${escapeAttr(v.html)}" loading="lazy"></iframe>
-            </div>
-            <div class="gen-card-body">
-              <div class="gen-card-style">${escapeHtml(v.style)}</div>
-              <div class="gen-card-desc">${escapeHtml(v.styleNote || '')}</div>
-              <div class="gen-card-actions">
-                <button class="btn btn-primary" data-preview="${i}">Preview</button>
-                <button class="btn btn-ghost" data-download="${i}">Download</button>
-              </div>
-            </div>
-          </div>`;
+  /* Read the streamed HTML, writing it into the card's iframe as it arrives.
+     document.write on an open document renders progressively the way a normal
+     page load does — setting srcdoc repeatedly would reload and flicker. */
+  async function consumeStream(res, i, token) {
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    const doc = getCardDoc(i);
+
+    let full = '';
+    let pending = '';
+    let lastPaint = 0;
+
+    if (doc) { doc.open(); }
+
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (token !== runToken) { reader.cancel().catch(() => { }); break; }
+
+      const text = decoder.decode(value, { stream: true });
+      full += text;
+      pending += text;
+
+      // Batch paints — writing on every chunk thrashes layout for no benefit.
+      const now = Date.now();
+      if (doc && now - lastPaint > 200) {
+        doc.write(pending);
+        pending = '';
+        lastPaint = now;
+        markStreaming(i, full.length);
       }
-      if (v.status === 'failed') {
-        return `
-          <div class="gen-card">
-            <div class="gen-card-thumb is-pending">
-              <div class="gen-card-failed">This design failed to generate.<br><small>${escapeHtml(v.error || '')}</small></div>
-            </div>
-            <div class="gen-card-body">
-              <div class="gen-card-style">${escapeHtml(v.style)}</div>
-              <div class="gen-card-desc">Not available</div>
-            </div>
-          </div>`;
-      }
-      return `
-        <div class="gen-card">
-          <div class="gen-card-thumb is-pending"><div class="gen-thumb-skeleton"></div></div>
-          <div class="gen-card-body">
-            <div class="gen-card-style">${escapeHtml(v.style)}</div>
-            <div class="gen-card-desc">Designing…</div>
-          </div>
-        </div>`;
-    }).join('');
+    }
+
+    if (doc) {
+      if (pending) doc.write(pending);
+      try { doc.close(); } catch { /* already closed */ }
+    }
+
+    const sentinel = full.indexOf('<!--SITEFORGE_ERROR:');
+    if (sentinel !== -1) {
+      throw new Error(full.slice(sentinel + 20).replace(/-->\s*$/, '').trim() || 'Generation failed');
+    }
+
+    return cleanClientHtml(full);
+  }
+
+  function cleanClientHtml(raw) {
+    let html = (raw || '').trim();
+    const fence = html.match(/^```(?:html)?\s*\n([\s\S]*?)\n?```$/i);
+    if (fence) html = fence[1].trim();
+    const start = html.search(/<!DOCTYPE html|<html[\s>]/i);
+    if (start > 0) html = html.slice(start);
+    return html.trim();
+  }
+
+  const cardAt = (i) => elGrid.querySelector(`[data-card="${i}"]`);
+
+  function getCardDoc(i) {
+    const frame = cardAt(i)?.querySelector('iframe');
+    try { return frame?.contentDocument || null; } catch { return null; }
+  }
+
+  /* Built once. Everything after this mutates cards in place, because
+     re-rendering the grid would destroy iframes mid-stream. */
+  function buildGrid() {
+    elGrid.innerHTML = variants.map((v, i) => `
+      <div class="gen-card is-streaming" data-card="${i}">
+        <div class="gen-card-thumb">
+          <iframe title="${escapeAttr(v.style)} preview" sandbox="allow-same-origin"></iframe>
+          <div class="gen-card-writing"><span class="gen-dot"></span>Writing…</div>
+        </div>
+        <div class="gen-card-body">
+          <div class="gen-card-style">${escapeHtml(v.style)}</div>
+          <div class="gen-card-desc">${escapeHtml(v.styleNote || '')}</div>
+          <div class="gen-card-actions"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  function markStreaming(i, bytes) {
+    const badge = cardAt(i)?.querySelector('.gen-card-writing');
+    if (badge) badge.innerHTML = `<span class="gen-dot"></span>Writing… ${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  function markReady(i) {
+    const card = cardAt(i);
+    if (!card) return;
+    card.classList.remove('is-streaming');
+    card.querySelector('.gen-card-writing')?.remove();
+    card.querySelector('.gen-card-actions').innerHTML = `
+      <button class="btn btn-primary" data-preview="${i}">Preview</button>
+      <button class="btn btn-ghost" data-download="${i}">Download</button>`;
+  }
+
+  function markFailed(i) {
+    const card = cardAt(i);
+    if (!card) return;
+    card.classList.remove('is-streaming');
+    card.querySelector('.gen-card-thumb').innerHTML =
+      `<div class="gen-card-failed">This design failed to generate.<br><small>${escapeHtml(variants[i].error || '')}</small></div>`;
+    card.querySelector('.gen-card-desc').textContent = 'Not available';
   }
 
   const escapeHtml = (s = '') => String(s)

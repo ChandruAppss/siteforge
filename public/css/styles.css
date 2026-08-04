@@ -1920,6 +1920,58 @@ s {
   place-items: center;
 }
 
+/* Live-writing state — the iframe is being streamed into. */
+.gen-card.is-streaming {
+  border-color: var(--purple-400);
+}
+
+.gen-card.is-streaming .gen-card-thumb {
+  background: var(--white);
+}
+
+.gen-card-writing {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(21, 8, 63, .82);
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: var(--r-pill);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+.gen-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #35d07f;
+  animation: pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: .35;
+    transform: scale(.7);
+  }
+}
+
+.gen-card-actions:empty {
+  display: none;
+}
+
 .gen-thumb-skeleton {
   width: 100%;
   height: 100%;
