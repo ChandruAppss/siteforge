@@ -2056,6 +2056,118 @@ s {
   transition: width .25s ease;
 }
 
+/* ══════════════════════ PRICE FOOTNOTE ══════════════════════ */
+.price-footnote {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  font-style: italic;
+}
+
+.price-table.no-comparison .pt-head,
+.price-table.no-comparison .pt-row {
+  grid-template-columns: 1fr 170px;
+}
+
+/* ══════════════════════ LEGAL PAGES ══════════════════════ */
+.legal-hero {
+  background: linear-gradient(120deg, var(--ink-900), var(--ink-700) 60%, #4a10a8);
+  padding: 54px 0 46px;
+  text-align: center;
+}
+
+.legal-hero h1 {
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: -.6px;
+}
+
+.legal-updated {
+  margin-top: 10px;
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, .72);
+}
+
+.legal-body {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 48px 20px 80px;
+}
+
+.legal-body h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 36px 0 12px;
+}
+
+.legal-body h2:first-child {
+  margin-top: 0;
+}
+
+.legal-body p,
+.legal-body li {
+  font-size: 16.5px;
+  line-height: 1.65;
+  color: #3d434b;
+  margin-bottom: 12px;
+}
+
+.legal-body ul {
+  padding-left: 0;
+  margin-bottom: 18px;
+}
+
+.legal-body li {
+  position: relative;
+  padding-left: 24px;
+}
+
+.legal-body li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 11px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--purple-500);
+}
+
+.legal-body a {
+  color: var(--purple-700);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.legal-note {
+  background: #fff8e6;
+  border: 1px solid #f3d68a;
+  border-left: 4px solid #e0a800;
+  border-radius: var(--r-sm);
+  padding: 14px 18px;
+  margin-bottom: 30px;
+  font-size: 15px;
+  color: #6b5200;
+}
+
+.legal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 26px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--purple-700);
+}
+
+.legal-back:hover {
+  text-decoration: underline;
+}
+
 /* ══════════════════════ RESPONSIVE ══════════════════════ */
 @media (max-width: 1100px) {
 

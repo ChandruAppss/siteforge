@@ -69,9 +69,9 @@
               </div>
             </div>
 
-            <div class="hero-trust">
+            <div class="hero-trust" data-customer-count-wrap>
               <span class="hero-trust-dot"></span>
-              <span><b>6,500+</b> businesses build with SiteForge</span>
+              <span><b data-customer-count>6,500+</b> businesses build with SiteForge</span>
             </div>
 
             <div class="hero-annual">Annual Plan &#8377;3,999/yr. &nbsp;Save 15% + FREE Domain</div>
@@ -98,6 +98,13 @@
                   best website</label>
               </div>
 
+              <!-- Only shown when the server has ACCESS_CODE set. -->
+              <div class="form-floating" id="accessCodeWrap" hidden>
+                <input type="text" class="form-control" id="accessCode" name="accessCode" placeholder="Access code"
+                  autocomplete="off" maxlength="64" />
+                <label for="accessCode">Access code</label>
+              </div>
+
               <div class="form-error" id="formError" role="alert" hidden></div>
 
               <div class="form-submit-wrap">
@@ -122,90 +129,9 @@
       <p class="section-sub">Everything a small business needs — bundled into one price.</p>
       <div class="save-badge">Save &#8377;20,000 Today!</div>
 
-      <div class="price-table">
-        <div class="pt-head">
-          <div class="pt-c1">Features</div>
-          <div class="pt-c2">Other Vendors</div>
-          <div class="pt-c3">SiteForge</div>
-        </div>
-
-        <div class="pt-group">Complete Website</div>
-        <div class="pt-row">
-          <div class="pt-c1">Website design &amp; build</div>
-          <div class="pt-c2"><s>&#8377;12,000</s></div>
-          <div class="pt-c3 pt-inc">&#8377;3,999</div>
-        </div>
-        <div class="pt-row">
-          <div class="pt-c1">Domain name (annual plan)</div>
-          <div class="pt-c2"><s>&#8377;999</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-        <div class="pt-row">
-          <div class="pt-c1">Hosting, SSL &amp; CDN</div>
-          <div class="pt-c2"><s>&#8377;1,200</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-        <div class="pt-row">
-          <div class="pt-c1">Unlimited edits &amp; support</div>
-          <div class="pt-c2"><s>&#8377;1,800</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-        <div class="pt-row">
-          <div class="pt-c1">Logo &amp; brand kit</div>
-          <div class="pt-c2"><s>&#8377;1,500</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-
-        <div class="pt-group">Get More Sales</div>
-        <div class="pt-row">
-          <div class="pt-c1">AI SEO toolkit</div>
-          <div class="pt-c2"><s>&#8377;3,000</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-        <div class="pt-row">
-          <div class="pt-c1">Lead capture forms</div>
-          <div class="pt-c2"><s>&#8377;1,000</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-        <div class="pt-row">
-          <div class="pt-c1">WhatsApp, call &amp; email buttons</div>
-          <div class="pt-c2"><s>&#8377;600</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-        <div class="pt-row">
-          <div class="pt-c1">UPI &amp; QR payments</div>
-          <div class="pt-c2"><s>&#8377;500</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-        <div class="pt-row">
-          <div class="pt-c1">Multi-language pages</div>
-          <div class="pt-c2"><s>&#8377;2,000</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-
-        <div class="pt-group">Growth Marketing</div>
-        <div class="pt-row">
-          <div class="pt-c1">Built-in CRM</div>
-          <div class="pt-c2"><s>&#8377;700</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-        <div class="pt-row">
-          <div class="pt-c1">AI writer &amp; social posts</div>
-          <div class="pt-c2"><s>&#8377;3,000</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-        <div class="pt-row">
-          <div class="pt-c1">Analytics &amp; ads integration</div>
-          <div class="pt-c2"><s>&#8377;2,500</s></div>
-          <div class="pt-c3 pt-free">FREE</div>
-        </div>
-
-        <div class="pt-row pt-total">
-          <div class="pt-c1">Total / Year</div>
-          <div class="pt-c2"><s>&#8377;30,799</s></div>
-          <div class="pt-c3">&#8377;3,999 ONLY!</div>
-        </div>
-      </div>
+      <!-- Rows come from js/content.js → pricing. Edit them there. -->
+      <div class="price-table" id="priceTable"></div>
+      <p class="price-footnote" id="priceNote"></p>
 
       <div class="price-cta">
         <a href="#generator" class="btn btn-primary btn-lg js-scroll">Try for FREE</a>
@@ -217,7 +143,8 @@
   <!-- ══════════════ TESTIMONIALS ══════════════ -->
   <section class="aboutsection" id="trust">
     <div class="container">
-      <h2 class="section-title">6,500+ Businesses<br /><span class="tt-sub">trust SiteForge</span></h2>
+      <h2 class="section-title"><span data-customer-count>6,500+</span> Businesses<br /><span class="tt-sub">trust
+          SiteForge</span></h2>
 
       <div class="testi-viewport">
         <button class="arrowcss arrow-left" id="testiPrev" aria-label="Previous testimonials">
@@ -329,24 +256,8 @@
       <h2 class="section-title section-title-light">Work with the best for your website</h2>
       <p class="section-sub section-sub-light">Built in India, for Indian small business.</p>
 
-      <div class="cred-grid">
-        <div class="cred-card">
-          <div class="cred-stat">30s</div>
-          <div class="cred-label">Average time to your first live draft</div>
-        </div>
-        <div class="cred-card">
-          <div class="cred-stat">6,500+</div>
-          <div class="cred-label">Businesses building on SiteForge</div>
-        </div>
-        <div class="cred-card">
-          <div class="cred-stat">6</div>
-          <div class="cred-label">Free custom websites before you pay</div>
-        </div>
-        <div class="cred-card">
-          <div class="cred-stat">100%</div>
-          <div class="cred-label">Refund guarantee, no questions asked</div>
-        </div>
-      </div>
+      <!-- Stats come from js/content.js → stats. Edit them there. -->
+      <div class="cred-grid" id="credGrid"></div>
 
       <div class="cred-cta">
         <a href="#generator" class="btn btn-white js-scroll">Try for FREE</a>
@@ -561,7 +472,7 @@
           <a href="#generator" class="btn btn-primary btn-block js-scroll">Try for FREE</a>
           <div class="pc-contact">
             <span>Contact us</span>
-            <a href="mailto:partners@siteforge.example">partners@siteforge.example</a>
+            <a href="mailto:partners@siteforge.example" data-mailto="partners">partners@siteforge.example</a>
           </div>
         </div>
       </div>
@@ -594,13 +505,13 @@
       <div class="footer-col">
         <h4>Company</h4>
         <a href="#partnershipsection" class="js-scroll">Partners</a>
-        <a href="mailto:hello@siteforge.example">Contact</a>
+        <a href="mailto:hello@siteforge.example" data-mailto="general" data-mailto-text="keep">Contact</a>
       </div>
       <div class="footer-col">
         <h4>Legal</h4>
-        <a href="#">Privacy policy</a>
-        <a href="#">Terms of service</a>
-        <a href="#">Refund policy</a>
+        <a href="privacy.html">Privacy policy</a>
+        <a href="terms.html">Terms of service</a>
+        <a href="refund.html">Refund policy</a>
       </div>
     </div>
     <div class="footer-base">
@@ -665,6 +576,7 @@
     </div>
   </div>
 
+  <script src="js/content.js"></script>
   <script src="js/app.js"></script>
 </body>
 

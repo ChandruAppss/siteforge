@@ -11,59 +11,12 @@
      Content data
      ───────────────────────────────────────────────────────────────────── */
 
-  // Sample testimonials — replace with your own real customer quotes before
-  // going live. Never publish invented quotes as if they were real people.
-  const TESTIMONIALS = [
-    { q: 'Clinic online instantly. Patients find us on search now.', n: 'Sample Customer', b: 'Dental clinic, Pune' },
-    { q: 'Easy website, and it actually brings in enquiries.', n: 'Sample Customer', b: 'Staffing firm, Chennai' },
-    { q: 'Fast AI creation. Went live the same evening.', n: 'Sample Customer', b: 'Handmade crafts, Nashik' },
-    { q: 'Easy to showcase the menu and receive orders.', n: 'Sample Customer', b: 'Catering, Hyderabad' },
-    { q: 'The online store expanded us to other cities.', n: 'Sample Customer', b: 'Home bakery, Mumbai' },
-    { q: 'Getting B2B orders straight from the website.', n: 'Sample Customer', b: 'Food brand, Bengaluru' },
-    { q: 'It brings our journey and our work together in one place.', n: 'Sample Customer', b: 'Fashion label, Jaipur' },
-    { q: 'AI made it effortless for a non-technical person like me.', n: 'Sample Customer', b: 'Snacks brand, Indore' },
-    { q: 'Easiest thing to update daily, and orders come in.', n: 'Sample Customer', b: 'Baking studio, Kolkata' },
-    { q: 'Scaling our customer reach and branding together.', n: 'Sample Customer', b: 'Art studio, Pune' },
-    { q: 'The website helps us show that we are genuine.', n: 'Sample Customer', b: 'Health services, Bengaluru' },
-    { q: 'Within days of launch we had orders beyond our city.', n: 'Sample Customer', b: 'Jewellery, Nagpur' },
-  ];
-
-  const MARQUEE = [
-    ['Bliss Studio', 'Salon', '#6a2bf3'], ['NorthCraft', 'Furniture', '#0ea5e9'],
-    ['GreenLeaf', 'Organic', '#12a150'], ['UrbanBite', 'Cafe', '#f59e0b'],
-    ['Vaidya Care', 'Clinic', '#ef4444'], ['PixelForge', 'Agency', '#8b5cf6'],
-    ['Sunrise Tutors', 'Education', '#0891b2'], ['Anand Sweets', 'Bakery', '#db2777'],
-    ['MetroFit', 'Gym', '#16a34a'], ['CasaDecor', 'Interiors', '#a16207'],
-    ['SwiftLogix', 'Logistics', '#2563eb'], ['Threadline', 'Apparel', '#c026d3'],
-    ['AquaPure', 'Services', '#0d9488'], ['BrightPath', 'Consulting', '#7c3aed'],
-  ];
-
-  const FAQS = [
-    ['What is included in the annual plan?',
-      'Your website build, a domain up to ₹999/year, hosting with SSL and CDN, a logo and brand kit, unlimited content changes, the full marketing platform (CRM, AI writer, SEO and analytics tools) and developer support — all for ₹3,999/year.'],
-    ['What is included in the monthly plan?',
-      'The monthly plan is ₹299/month and includes everything in the annual plan except the free domain. You can switch to annual at any time and we credit the difference.'],
-    ['I already have a domain. Can I use it?',
-      'Yes. Point your existing domain to SiteForge and we handle the DNS, SSL certificate and redirects for you. There is no extra charge, and your plan price does not change.'],
-    ['Will I own the domain?',
-      'Yes. The domain is registered in your name with you as the legal registrant. You can transfer it away at any time — we do not hold it hostage.'],
-    ['What features are included in the online store?',
-      'Add to cart and checkout, payment gateway plus UPI and QR, an admin panel for orders, unlimited products with stock management, discount codes and order notifications by email and WhatsApp. The store add-on is ₹250/month or ₹3,000/year.'],
-    ['Will you support updating the website after go-live?',
-      'Yes, and it is free. Edit anything yourself from your phone, or message our support team and we make the change for you. There is no per-change fee, ever.'],
-    ['How is SiteForge different from other website builders?',
-      'Most builders hand you an empty template and an hourly rate for help. SiteForge generates six complete, written-for-you websites from a description of your business, then bundles the domain, hosting, logo, SEO and marketing tools into one price with unlimited edits included.'],
-    ['Can I migrate my existing website to SiteForge?',
-      'Yes. Share your current site URL and our team moves your pages, images and content across, sets up redirects so you keep your search rankings, and shows you the result before anything goes live.'],
-    ['How do I get a 100% refund?',
-      'Email support within 30 days of payment and we refund in full, no questions asked. Refunds are processed back to the original payment method within 5–7 working days.'],
-    ['What are the charges after one year?',
-      'The same ₹3,999/year renewal — including the domain. We do not run a low first-year price and then raise it on renewal.'],
-    ['What do I get in the free marketing platform?',
-      'A CRM with a lead inbox, an AI writer for offers and social posts, SEO tools that keep your pages updated, social media scheduling, and analytics with ads integration. It is included at no extra cost on every plan.'],
-    ['My selected website does not have all my details. How do these get updated?',
-      'Add them yourself in the editor — it takes a couple of minutes — or send them to our team and we will fill everything in for you before go-live. Either way it is included.'],
-  ];
+  // All editable copy, pricing, stats and quotes live in js/content.js so
+  // there is exactly one place to swap placeholders for real data.
+  const C = window.SITEFORGE_CONTENT || {};
+  const TESTIMONIALS = (C.testimonials?.show === false ? [] : C.testimonials?.items) || [];
+  const MARQUEE = (C.marquee?.show === false ? [] : C.marquee?.items) || [];
+  const FAQS = C.faqs || [];
 
   /* ─────────────────────────────────────────────────────────────────────
      Render: testimonials
@@ -73,6 +26,14 @@
   function renderTestimonials() {
     const track = $('#testiTrack');
     if (!track) return;
+
+    // No quotes configured (or switched off) — drop the whole section rather
+    // than leave an empty heading behind.
+    if (!TESTIMONIALS.length) {
+      const section = $('#trust');
+      if (section) section.hidden = true;
+      return;
+    }
 
     track.innerHTML = TESTIMONIALS.map(t => `
       <article class="testi-card">
@@ -136,9 +97,102 @@
         <span><span class="mq-name">${name}</span><br><span class="mq-cat">${cat}</span></span>
       </div>`;
 
+    if (!MARQUEE.length) {
+      const section = $('#logolistcarsel');
+      if (section) section.hidden = true;
+      return;
+    }
+
     const a = $('#marqueeA'), b = $('#marqueeB');
     if (a) a.innerHTML = [...MARQUEE, ...MARQUEE].map(item).join('');
     if (b) b.innerHTML = [...MARQUEE.slice().reverse(), ...MARQUEE.slice().reverse()].map(item).join('');
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     Render: price comparison table
+     ───────────────────────────────────────────────────────────────────── */
+  function renderPricing() {
+    const table = $('#priceTable');
+    const p = C.pricing;
+    if (!table || !p) return;
+
+    const showCmp = p.showComparison !== false;
+    table.classList.toggle('no-comparison', !showCmp);
+
+    const cell2 = (v) => showCmp ? `<div class="pt-c2"><s>${escapeHtml(v)}</s></div>` : '';
+
+    const rows = p.groups.map(g => `
+      <div class="pt-group">${escapeHtml(g.title)}</div>
+      ${g.rows.map(r => `
+        <div class="pt-row">
+          <div class="pt-c1">${escapeHtml(r.feature)}</div>
+          ${cell2(r.separate)}
+          <div class="pt-c3 ${r.kind === 'free' ? 'pt-free' : 'pt-inc'}">${escapeHtml(r.ours)}</div>
+        </div>`).join('')}`).join('');
+
+    table.innerHTML = `
+      <div class="pt-head">
+        <div class="pt-c1">Features</div>
+        ${showCmp ? '<div class="pt-c2">Bought separately</div>' : ''}
+        <div class="pt-c3">SiteForge</div>
+      </div>
+      ${rows}
+      <div class="pt-row pt-total">
+        <div class="pt-c1">Total / Year</div>
+        ${cell2(p.total.separate)}
+        <div class="pt-c3">${escapeHtml(p.total.ours)}</div>
+      </div>`;
+
+    const note = $('#priceNote');
+    if (note) {
+      note.textContent = showCmp ? (p.comparisonNote || '') : '';
+      note.hidden = !showCmp;
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     Render: stats band + customer count + contact links
+     ───────────────────────────────────────────────────────────────────── */
+  function renderStats() {
+    const grid = $('#credGrid');
+    const s = C.stats;
+    if (!grid || !s) return;
+
+    if (s.show === false || !s.items?.length) {
+      const section = $('#awards');
+      if (section) section.hidden = true;
+      return;
+    }
+
+    grid.innerHTML = s.items.map(i => `
+      <div class="cred-card">
+        <div class="cred-stat">${escapeHtml(i.value)}</div>
+        <div class="cred-label">${escapeHtml(i.label)}</div>
+      </div>`).join('');
+  }
+
+  function renderCustomerCount() {
+    const count = C.customerCount;
+    $$('[data-customer-count]').forEach(el => {
+      // Hide the whole line when there is no number worth claiming.
+      if (!count) { el.hidden = true; return; }
+      el.textContent = count;
+    });
+    if (!count) $$('[data-customer-count-wrap]').forEach(el => el.hidden = true);
+  }
+
+  function renderContact() {
+    const c = C.contact || {};
+    $$('[data-mailto]').forEach(el => {
+      const key = el.dataset.mailto;
+      const addr = c[key];
+      if (!addr) return;
+      el.href = `mailto:${addr}`;
+      if (el.dataset.mailtoText !== 'keep') el.textContent = addr;
+    });
+    $$('[data-support-hours]').forEach(el => {
+      if (c.supportHours) el.textContent = c.supportHours;
+    });
   }
 
   /* ─────────────────────────────────────────────────────────────────────
@@ -310,14 +364,27 @@
       elStatus.textContent = `${ready} of ${total} websites ready…`;
     };
 
+    const accessCode = ($('#accessCode')?.value || '').trim();
+
     await Promise.all(styles.map(async (s, i) => {
       try {
         const res = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ businessName, businessDescription, styleIndex: s.index }),
+          body: JSON.stringify({ businessName, businessDescription, styleIndex: s.index, accessCode }),
         });
         const data = await res.json().catch(() => ({}));
+
+        // A bad code or a rate limit applies to the whole run, not one design —
+        // stop everything and say so once instead of six identical card errors.
+        if (res.status === 401 || res.status === 429) {
+          if (token === runToken) {
+            revealAccessCode();
+            showError(data.error || 'Access denied.');
+          }
+          throw new Error(data.error || 'Access denied');
+        }
+
         if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
 
         if (token !== runToken) return;
@@ -435,6 +502,22 @@
 
   const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'site';
 
+  /* Ask the server once on load whether it needs an access code, so the field
+     is already present rather than appearing after a failed submit. */
+  async function probeServer() {
+    try {
+      const res = await fetch('/api/styles');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.accessCodeRequired) revealAccessCode();
+    } catch { /* offline / server down — the submit path reports that properly */ }
+  }
+
+  function revealAccessCode() {
+    const wrap = $('#accessCodeWrap');
+    if (wrap) wrap.hidden = false;
+  }
+
   /* ─────────────────────────────────────────────────────────────────────
      Wiring
      ───────────────────────────────────────────────────────────────────── */
@@ -505,9 +588,14 @@
   }
 
   /* ── Go ─────────────────────────────────────────────────────────────── */
+  renderPricing();
+  renderStats();
+  renderCustomerCount();
+  renderContact();
   renderTestimonials();
   renderMarquee();
   renderFaq();
   initChrome();
   initGenerator();
+  probeServer();
 })();

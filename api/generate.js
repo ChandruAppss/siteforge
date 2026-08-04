@@ -4,6 +4,7 @@
    serverless instances). */
 
 import { generateWebsite, validateInput, MODEL } from '../lib/generate.js';
+import { rateLimit, codeMatches, accessCodeRequired } from '../lib/ratelimit.js';
 
 export const config = {
   maxDuration: 60,   // seconds; raise to 300 on a Vercel Pro plan
@@ -13,6 +14,24 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // ── Gate 1: shared access code (the real protection) ──────────────────
+  if (accessCodeRequired() && !codeMatches(req.body?.accessCode, process.env.ACCESS_CODE)) {
+    return res.status(401).json({
+      error: 'That access code is not right.',
+      code: 'BAD_ACCESS_CODE',
+    });
+  }
+
+  // ── Gate 2: per-IP rate limit (best-effort, see lib/ratelimit.js) ─────
+  const limit = rateLimit(req);
+  if (!limit.allowed) {
+    res.setHeader('Retry-After', String(limit.retryAfter));
+    return res.status(429).json({
+      error: `Too many websites generated from this connection. Try again in about ${Math.ceil(limit.retryAfter / 60)} minutes.`,
+      code: 'RATE_LIMITED',
+    });
   }
 
   const parsed = validateInput(req.body);
