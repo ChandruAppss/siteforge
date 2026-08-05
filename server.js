@@ -33,7 +33,7 @@ app.get('/api/health', (req, res) => {
 
 app.listen(PORT, () => {
   const status = providerStatus();
-  console.log(`\n  SiteForge running → http://localhost:${PORT}`);
+  console.log(`\n  WebSyite running → http://localhost:${PORT}`);
 
   if (process.env.MOCK_GENERATION === '1') {
     console.log('  Provider: MOCK (no API calls, no cost)\n');

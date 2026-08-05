@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SiteForge — landing page behaviour + AI generation flow
+   WebSyite — landing page behaviour + AI generation flow
    ========================================================================== */
 (function () {
   'use strict';
@@ -13,7 +13,7 @@
 
   // All editable copy, pricing, stats and quotes live in js/content.js so
   // there is exactly one place to swap placeholders for real data.
-  const C = window.SITEFORGE_CONTENT || {};
+  const C = window.WEBSYITE_CONTENT || {};
   const TESTIMONIALS = (C.testimonials?.show === false ? [] : C.testimonials?.items) || [];
   const MARQUEE = (C.marquee?.show === false ? [] : C.marquee?.items) || [];
   const FAQS = C.faqs || [];
@@ -134,7 +134,7 @@
       <div class="pt-head">
         <div class="pt-c1">Features</div>
         ${showCmp ? '<div class="pt-c2">Bought separately</div>' : ''}
-        <div class="pt-c3">SiteForge</div>
+        <div class="pt-c3">WebSyite</div>
       </div>
       ${rows}
       <div class="pt-row pt-total">
@@ -524,7 +524,7 @@
       try { doc.close(); } catch { /* already closed */ }
     }
 
-    const sentinel = full.indexOf('<!--SITEFORGE_ERROR:');
+    const sentinel = full.indexOf('<!--WEBSYITE_ERROR:');
     if (sentinel !== -1) {
       throw new Error(full.slice(sentinel + 20).replace(/-->\s*$/, '').trim() || 'Generation failed');
     }

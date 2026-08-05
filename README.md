@@ -1,4 +1,4 @@
-# SiteForge
+# WebSyite
 
 An AI website-builder landing page with a **working generator** behind it. A visitor types their
 business name and a description, and Claude generates six complete, self-contained websites — six
@@ -6,7 +6,7 @@ different art directions, not six recolours of one template — which the visito
 desktop/tablet/mobile widths and download as standalone HTML files.
 
 ```
-siteforge/
+websyite/
 ├── api/
 │   ├── generate.js        serverless function — generates ONE website
 │   └── styles.js          serverless function — lists design directions + server state
@@ -31,7 +31,7 @@ siteforge/
 ## Running locally
 
 ```bash
-cd siteforge && npm install
+cd websyite && npm install
 ```
 
 Add your API key — get one at <https://console.anthropic.com/settings/keys>:

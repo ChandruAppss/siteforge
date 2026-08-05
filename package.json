@@ -1,8 +1,8 @@
 {
-  "name": "siteforge",
+  "name": "websyite",
   "version": "1.0.0",
   "private": true,
-  "description": "SiteForge — AI website builder landing page with a working Claude-powered generator",
+  "description": "WebSyite — AI website builder landing page with a working Claude-powered generator",
   "type": "module",
   "scripts": {
     "start": "node server.js",

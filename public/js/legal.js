@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  const C = window.SITEFORGE_CONTENT || {};
+  const C = window.WEBSYITE_CONTENT || {};
   const contact = C.contact || {};
 
   document.querySelectorAll('[data-mailto]').forEach((el) => {

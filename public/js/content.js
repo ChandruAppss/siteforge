@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SiteForge — editable content
+   WebSyite — editable content
    ==========================================================================
    Everything on the page that makes a factual claim lives here. Change it in
    this one file; nothing else needs touching.
@@ -9,13 +9,13 @@
    quotes you can actually stand behind before you drive traffic here.
    ========================================================================== */
 
-window.SITEFORGE_CONTENT = {
+window.WEBSYITE_CONTENT = {
 
   /* ── Contact ────────────────────────────────────────────────────────────
      ⚠ PLACEHOLDER — .example domains do not exist. Use real inboxes. */
   contact: {
-    general: 'hello@siteforge.example',
-    partners: 'partners@siteforge.example',
+    general: 'hello@websyite.com',
+    partners: 'partners@websyite.com',
     supportHours: 'Mon–Sat, 10am–7pm IST',
   },
 
@@ -87,7 +87,7 @@ window.SITEFORGE_CONTENT = {
       // Measured: one website takes ~97s, six run in parallel, so wall-clock is
       // roughly two minutes. Re-measure if the prompt or MAX_TOKENS changes.
       { value: '~2 min', label: 'From your description to six finished websites', real: true },
-      { value: '6,500+', label: 'Businesses building on SiteForge', real: false },
+      { value: '6,500+', label: 'Businesses building on WebSyite', real: false },
       { value: '6', label: 'Free custom websites before you pay', real: true },
       { value: '100%', label: 'Refund guarantee, no questions asked', real: true },
     ],
@@ -145,16 +145,16 @@ window.SITEFORGE_CONTENT = {
     ['What is included in the monthly plan?',
       'The monthly plan is ₹299/month and includes everything in the annual plan except the free domain. You can switch to annual at any time and we credit the difference.'],
     ['I already have a domain. Can I use it?',
-      'Yes. Point your existing domain to SiteForge and we handle the DNS, SSL certificate and redirects for you. There is no extra charge, and your plan price does not change.'],
+      'Yes. Point your existing domain to WebSyite and we handle the DNS, SSL certificate and redirects for you. There is no extra charge, and your plan price does not change.'],
     ['Will I own the domain?',
       'Yes. The domain is registered in your name with you as the legal registrant. You can transfer it away at any time — we do not hold it hostage.'],
     ['What features are included in the online store?',
       'Add to cart and checkout, payment gateway plus UPI and QR, an admin panel for orders, unlimited products with stock management, discount codes and order notifications by email and WhatsApp. The store add-on is ₹250/month or ₹3,000/year.'],
     ['Will you support updating the website after go-live?',
       'Yes, and it is free. Edit anything yourself from your phone, or message our support team and we make the change for you. There is no per-change fee, ever.'],
-    ['How is SiteForge different from other website builders?',
-      'Most builders hand you an empty template and an hourly rate for help. SiteForge generates six complete, written-for-you websites from a description of your business, then bundles the domain, hosting, logo, SEO and marketing tools into one price with unlimited edits included.'],
-    ['Can I migrate my existing website to SiteForge?',
+    ['How is WebSyite different from other website builders?',
+      'Most builders hand you an empty template and an hourly rate for help. WebSyite generates six complete, written-for-you websites from a description of your business, then bundles the domain, hosting, logo, SEO and marketing tools into one price with unlimited edits included.'],
+    ['Can I migrate my existing website to WebSyite?',
       'Yes. Share your current site URL and our team moves your pages, images and content across, sets up redirects so you keep your search rankings, and shows you the result before anything goes live.'],
     ['How do I get a 100% refund?',
       'Email support within 30 days of payment and we refund in full, no questions asked. Refunds are processed back to the original payment method within 5–7 working days.'],

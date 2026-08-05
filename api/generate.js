@@ -17,7 +17,7 @@ export const config = {
 /* Streaming means the status code is committed before we know whether the
    generation will succeed. A failure after the first byte is signalled with
    this trailer, which the client checks for. */
-export const ERROR_SENTINEL = '<!--SITEFORGE_ERROR:';
+export const ERROR_SENTINEL = '<!--WEBSYITE_ERROR:';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
