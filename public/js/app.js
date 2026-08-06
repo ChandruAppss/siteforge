@@ -376,13 +376,33 @@
     const total = variants.length;
     let settled = 0;
 
+    /* A run takes about a minute, and for the first ~40s of it the panes are
+       blank — the opening chunk of any HTML document is <head> and <style>,
+       which renders as nothing. Without an elapsed count and a stated
+       expectation, "working" and "hung" look identical. */
+    const startedAt = Date.now();
+    const elapsed = () => {
+      const s = Math.round((Date.now() - startedAt) / 1000);
+      return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, '0')}s`;
+    };
+
     const updateProgress = () => {
       const ready = variants.filter(v => v.status === 'ready').length;
-      elResultsStatus.textContent = settled < total
-        ? `Writing your websites… ${ready} of ${total} finished`
-        : `${ready} of ${total} websites ready`;
+      if (settled >= total) {
+        elResultsStatus.textContent = `${ready} of ${total} websites ready · took ${elapsed()}`;
+        return;
+      }
+      elResultsStatus.innerHTML =
+        `Writing your websites — usually about a minute. `
+        + `<b>${ready} of ${total}</b> finished · <span class="gen-elapsed">${elapsed()}</span>`;
     };
     updateProgress();
+
+    // Tick the clock so the number visibly moves even before any bytes land.
+    const ticker = setInterval(() => {
+      if (token !== runToken || settled >= total) { clearInterval(ticker); return; }
+      updateProgress();
+    }, 1000);
 
     const accessCode = ($('#accessCode')?.value || '').trim();
 
@@ -555,6 +575,17 @@
       <div class="gen-card is-streaming" data-card="${i}">
         <div class="gen-card-thumb">
           <iframe title="${escapeAttr(v.style)} preview" sandbox="allow-same-origin"></iframe>
+          <!-- Page-shaped skeleton so an empty pane reads as "being written"
+               rather than "broken". Removed on the first painted byte. -->
+          <div class="gen-skeleton" aria-hidden="true">
+            <span class="sk-nav"></span>
+            <span class="sk-hero"></span>
+            <span class="sk-line w70"></span>
+            <span class="sk-line w45"></span>
+            <span class="sk-cards"><i></i><i></i><i></i></span>
+            <span class="sk-line w60"></span>
+            <span class="sk-line w35"></span>
+          </div>
           <div class="gen-card-writing"><span class="gen-dot"></span>Writing…</div>
         </div>
         <div class="gen-card-body">
@@ -566,7 +597,21 @@
   }
 
   function markStreaming(i, bytes) {
-    const badge = cardAt(i)?.querySelector('.gen-card-writing');
+    const card = cardAt(i);
+    if (!card) return;
+
+    // Drop the skeleton only once the page renders something a person can SEE.
+    // Bytes arriving is not that: the opening chunk is <head> and <style>, which
+    // paints as nothing. Removing on first byte would expose a blank pane for
+    // ~40s, which is the exact problem the skeleton exists to solve.
+    const skeleton = card.querySelector('.gen-skeleton');
+    if (skeleton) {
+      let visible = 0;
+      try { visible = (getCardDoc(i)?.body?.innerText || '').trim().length; } catch { /* not ready */ }
+      if (visible > 20) skeleton.remove();
+    }
+
+    const badge = card.querySelector('.gen-card-writing');
     if (badge) badge.innerHTML = `<span class="gen-dot"></span>Writing… ${(bytes / 1024).toFixed(1)} KB`;
   }
 

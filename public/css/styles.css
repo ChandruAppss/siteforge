@@ -1929,6 +1929,80 @@ s {
   background: var(--white);
 }
 
+/* Page-shaped skeleton shown while a design is still in its <head>/<style>
+   opening chunk, which paints as nothing. Sits over the iframe and is removed
+   on the first real byte. */
+.gen-skeleton {
+  position: absolute;
+  inset: 0;
+  padding: 12px;
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gen-skeleton>* {
+  border-radius: 4px;
+  background: linear-gradient(100deg, var(--gray-100) 30%, var(--gray-200) 50%, var(--gray-100) 70%);
+  background-size: 220% 100%;
+  animation: shimmer 1.4s linear infinite;
+  flex: none;
+}
+
+.gen-skeleton .sk-nav {
+  height: 14px;
+}
+
+.gen-skeleton .sk-hero {
+  height: 64px;
+  border-radius: 6px;
+}
+
+.gen-skeleton .sk-line {
+  height: 8px;
+}
+
+.gen-skeleton .w70 {
+  width: 70%;
+}
+
+.gen-skeleton .w60 {
+  width: 60%;
+}
+
+.gen-skeleton .w45 {
+  width: 45%;
+}
+
+.gen-skeleton .w35 {
+  width: 35%;
+}
+
+.gen-skeleton .sk-cards {
+  display: flex;
+  gap: 8px;
+  background: none;
+  animation: none;
+  height: 46px;
+}
+
+.gen-skeleton .sk-cards i {
+  flex: 1;
+  border-radius: 4px;
+  background: linear-gradient(100deg, var(--gray-100) 30%, var(--gray-200) 50%, var(--gray-100) 70%);
+  background-size: 220% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.gen-elapsed {
+  font-variant-numeric: tabular-nums;
+  color: var(--purple-700);
+  font-weight: 600;
+}
+
 .gen-card-writing {
   position: absolute;
   left: 10px;
