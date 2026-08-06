@@ -544,11 +544,27 @@
       <!-- Results state -->
       <div class="gen-results" id="genResults" hidden>
         <div class="gen-results-head">
-          <div>
-            <h3 class="gen-title">Your websites</h3>
-            <p class="gen-sub" id="genResultsStatus">Writing your websites&hellip;</p>
+          <div class="gen-head-main">
+            <!-- Countdown ring: answers "how long" before the panes have
+                 anything visible in them. Hidden once every design lands. -->
+            <div class="gen-ring" id="genRing" aria-hidden="true">
+              <svg viewBox="0 0 44 44">
+                <circle class="gen-ring-track" cx="22" cy="22" r="19" />
+                <circle class="gen-ring-fill" id="genRingFill" cx="22" cy="22" r="19" />
+              </svg>
+              <span class="gen-ring-num" id="genRingNum">75</span>
+            </div>
+            <div>
+              <h3 class="gen-title" id="genResultsTitle">Getting ready</h3>
+              <p class="gen-sub" id="genResultsStatus">Writing your websites&hellip;</p>
+            </div>
           </div>
           <button class="btn btn-ghost" id="genRestart">Start over</button>
+        </div>
+
+        <!-- Tells people what the next step is, before they have to guess. -->
+        <div class="gen-nextstep" id="genNextStep">
+          Look through every design, then pick the one you want to publish.
         </div>
         <div class="gen-grid" id="genGrid"></div>
       </div>
@@ -570,7 +586,7 @@
         <button class="preview-size is-active" data-w="100%">Desktop</button>
         <button class="preview-size" data-w="820px">Tablet</button>
         <button class="preview-size" data-w="390px">Mobile</button>
-        <button class="btn btn-primary btn-sm" id="previewDownload">Download HTML</button>
+        <button class="btn btn-primary btn-sm" id="previewSelect">Select this design</button>
         <button class="preview-close" id="previewClose" aria-label="Close preview">&times;</button>
       </div>
     </div>

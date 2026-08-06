@@ -381,20 +381,43 @@
        which renders as nothing. Without an elapsed count and a stated
        expectation, "working" and "hung" look identical. */
     const startedAt = Date.now();
-    const elapsed = () => {
-      const s = Math.round((Date.now() - startedAt) / 1000);
-      return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, '0')}s`;
-    };
+    // Measured: ~70s for three designs. Budget slightly over so the common case
+    // finishes with time on the clock rather than blowing through zero.
+    const BUDGET_S = 25 * total;
+
+    const ring = $('#genRing');
+    const ringNum = $('#genRingNum');
+    const ringFill = $('#genRingFill');
+    const title = $('#genResultsTitle');
+    const nextStep = $('#genNextStep');
+    const CIRC = 2 * Math.PI * 19;
 
     const updateProgress = () => {
       const ready = variants.filter(v => v.status === 'ready').length;
+      const secs = Math.round((Date.now() - startedAt) / 1000);
+      const left = Math.max(0, BUDGET_S - secs);
+
       if (settled >= total) {
-        elResultsStatus.textContent = `${ready} of ${total} websites ready · took ${elapsed()}`;
+        if (ring) ring.hidden = true;
+        title.textContent = ready === total ? 'Your websites are ready' : 'Finished';
+        elResultsStatus.textContent = `${ready} of ${total} ready · took ${secs}s`;
+        if (nextStep) nextStep.textContent = 'Pick the design you want to publish.';
         return;
       }
+
+      title.textContent = 'Getting ready';
       elResultsStatus.innerHTML =
-        `Writing your websites — usually about a minute. `
-        + `<b>${ready} of ${total}</b> finished · <span class="gen-elapsed">${elapsed()}</span>`;
+        `${total} designs for <b>${escapeHtml(businessName)}</b> are being written`
+        + ` · <b>${ready} of ${total}</b> done`;
+
+      if (ringNum) ringNum.textContent = left > 0 ? String(left) : '…';
+      if (ringFill) {
+        // Drain the ring over the budget. Past budget it sits empty rather than
+        // wrapping around, which would read as restarting.
+        const frac = Math.min(1, secs / BUDGET_S);
+        ringFill.style.strokeDasharray = `${CIRC}`;
+        ringFill.style.strokeDashoffset = `${CIRC * frac}`;
+      }
     };
     updateProgress();
 
@@ -620,9 +643,12 @@
     if (!card) return;
     card.classList.remove('is-streaming');
     card.querySelector('.gen-card-writing')?.remove();
+    // No download button. Handing over the finished HTML for free gives away the
+    // entire product — the site is what people pay for. Preview is free;
+    // publishing is the paid step.
     card.querySelector('.gen-card-actions').innerHTML = `
-      <button class="btn btn-primary" data-preview="${i}">Preview</button>
-      <button class="btn btn-ghost" data-download="${i}">Download</button>`;
+      <button class="btn btn-ghost" data-preview="${i}">Preview</button>
+      <button class="btn btn-primary" data-select="${i}">Select this design</button>`;
   }
 
   function markFailed(i) {
@@ -675,6 +701,32 @@
   }
 
   const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'site';
+
+  /* Choosing a design is the point the funnel converts. Preview stays free;
+     publishing is what is paid for. This prototype has no accounts, no
+     persistence and no payment gateway, so it hands off to plan selection
+     rather than pretending to take money. */
+  function selectDesign(i) {
+    const v = variants[i];
+    if (!v || v.status !== 'ready') return;
+
+    $$('.gen-card').forEach(c => c.classList.remove('is-selected'));
+    cardAt(i)?.classList.add('is-selected');
+
+    const head = $('#genNextStep');
+    if (head) {
+      head.classList.add('is-chosen');
+      head.innerHTML =
+        `<b>${escapeHtml(v.style)}</b> selected for <b>${escapeHtml(v.businessName || 'your business')}</b>. `
+        + `Choose a plan to publish it on your own domain. `
+        + `<button class="btn btn-primary btn-sm" id="genGoPlans">Choose a plan</button>`;
+      $('#genGoPlans')?.addEventListener('click', () => {
+        closeOverlay();
+        $('#pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      head.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
 
   /* Ask the server once on load whether it needs an access code, so the field
      is already present rather than appearing after a failed submit. */
@@ -737,12 +789,16 @@
     elGrid.addEventListener('click', (e) => {
       const p = e.target.closest('[data-preview]');
       if (p) return openPreview(Number(p.dataset.preview));
-      const d = e.target.closest('[data-download]');
-      if (d) return download(Number(d.dataset.download));
+      const s = e.target.closest('[data-select]');
+      if (s) return selectDesign(Number(s.dataset.select));
     });
 
     $('#previewClose').addEventListener('click', closePreview);
-    $('#previewDownload').addEventListener('click', () => download(previewIndex));
+    $('#previewSelect').addEventListener('click', () => {
+      const i = previewIndex;
+      closePreview();
+      selectDesign(i);
+    });
 
     $$('.preview-size').forEach(btn => {
       btn.addEventListener('click', () => {
