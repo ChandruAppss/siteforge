@@ -14,6 +14,14 @@
   // All editable copy, pricing, stats and quotes live in js/content.js so
   // there is exactly one place to swap placeholders for real data.
   const C = window.WEBSYITE_CONTENT || {};
+
+  /* Where the actual product lives. This page generates designs and nothing
+     else — no accounts, no persistence, no payment gateway — so every step past
+     "here are your designs" hands off to the app.
+
+     Overridable from content.js so this survives the app moving to its own
+     domain without a code change. */
+  const APP_ORIGIN = C.appOrigin || 'https://siteforge-platform.vercel.app';
   const TESTIMONIALS = (C.testimonials?.show === false ? [] : C.testimonials?.items) || [];
   const MARQUEE = (C.marquee?.show === false ? [] : C.marquee?.items) || [];
   const FAQS = C.faqs || [];
@@ -718,11 +726,21 @@
       head.classList.add('is-chosen');
       head.innerHTML =
         `<b>${escapeHtml(v.style)}</b> selected for <b>${escapeHtml(v.businessName || 'your business')}</b>. `
-        + `Choose a plan to publish it on your own domain. `
-        + `<button class="btn btn-primary btn-sm" id="genGoPlans">Choose a plan</button>`;
+        + `Publishing it on your own domain happens in the app. `
+        + `<button class="btn btn-primary btn-sm" id="genGoPlans">Continue to plans</button>`;
+
+      // Previously this closed the overlay and scrolled to '#pricing' — which is
+      // the id on the HERO section, not the price table. It dropped people back
+      // at the top of the page next to the form they had just used, with no way
+      // forward. This page cannot take a payment at all; the app can.
       $('#genGoPlans')?.addEventListener('click', () => {
-        closeOverlay();
-        $('#pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const url = new URL('/start', APP_ORIGIN);
+        // Carry the answers across so nobody retypes what they just told us.
+        if (v.businessName) url.searchParams.set('name', v.businessName);
+        const desc = $('#businessDescription')?.value?.trim();
+        if (desc) url.searchParams.set('description', desc.slice(0, 1200));
+        url.searchParams.set('style', v.style);
+        window.location.assign(url.toString());
       });
       head.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }

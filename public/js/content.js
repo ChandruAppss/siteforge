@@ -11,6 +11,12 @@
 
 window.WEBSYITE_CONTENT = {
 
+  /* Where the app lives — accounts, plans, payment, publishing. This page only
+     generates designs, so every "continue" hands off here. Change this one line
+     when the app moves to its own domain. */
+  appOrigin: 'https://siteforge-platform.vercel.app',
+
+
   /* ── Contact ────────────────────────────────────────────────────────────
      ⚠ PLACEHOLDER — .example domains do not exist. Use real inboxes. */
   contact: {
